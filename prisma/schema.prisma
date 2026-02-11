@@ -1,0 +1,26 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Internship {
+  id          Int      @id @default(autoincrement())
+  origin      String   // "UADER", "LINKEDIN"
+  title       String  // Título del empleo 
+  url         String   @unique // Esto nos sirve como id externa según la plataforma
+  imageUrl    String?  // Foto de la empresa o lo que se necesite en el momento
+  
+  // Fechas
+  publishedAt DateTime? // Fecha de publicación del empleo (si es UADER es un artículo, sino ya veremos)
+  foundAt     DateTime  @default(now()) // Fecha que lo encontró el bot
+  
+  // Estado
+  isPublished Boolean   @default(false) //Si ya está publicado lo marco asi no lo republico
+
+  @@map("internships")
+}
