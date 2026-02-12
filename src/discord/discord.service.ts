@@ -5,9 +5,11 @@ import { WebhookClient, EmbedBuilder } from 'discord.js';
 export class DiscordService {
   private readonly logger = new Logger(DiscordService.name);
   private webhookClient: WebhookClient;
+  private roleId: string | undefined;
 
   constructor() {
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    this.roleId = process.env.DISCORD_ROLE_ID;
     if (!webhookUrl) {
       this.logger.warn(
         '⚠️ DISCORD_WEBHOOK_URL no está definido en .env. Las notificaciones fallarán.',
@@ -39,9 +41,12 @@ export class DiscordService {
         embed.setImage(internship.imageUrl);
       }
 
+      const mentionText = this.roleId
+        ? `<@&${this.roleId}>`
+        : '¡Atención estudiantes!';
+
       await this.webhookClient.send({
-        content:
-          '📢 **¡Atención estudiantes!** Se ha detectado una nueva pasantía.',
+        content: `${mentionText} 📢 **¡Atención estudiantes!** Se ha detectado una nueva pasantía.`,
         embeds: [embed],
       });
 
