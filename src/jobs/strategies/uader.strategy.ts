@@ -13,7 +13,7 @@ export class UaderStrategy implements JobScraperStrategy {
 
   // Palabras Clave (Keywords) para el filtrado
   // Usamos minúsculas y sin acentos para normalizar la búsqueda
-  private readonly KEYWORDS = ['pasantia', 'pasantía', 'rentada'];
+  private readonly KEYWORDS = ['pasantia', 'pasantía', 'rentada', 'fcyt'];
 
   async scrape(): Promise<ScrapedInternship[]> {
     this.logger.log('Analizando artículos en Secretaría de Extensión...');
