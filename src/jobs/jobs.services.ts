@@ -1,22 +1,30 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { UaderStrategy } from './strategies/uader.strategy';
 import {
   JobScraperStrategy,
   ScrapedInternship,
 } from './strategies/job-scraper.interface';
+import { DiscordService } from '../discord/discord.service';
 
 @Injectable()
-export class JobsService {
+export class JobsService implements OnModuleInit {
+  // <--- Implementar la interfaz
   private readonly logger = new Logger(JobsService.name);
   private strategies: JobScraperStrategy[] = [];
 
   constructor(
-    private prisma: PrismaService,
-    // Inyectamos la estrategia (a futuro aquí inyectaremos GoogleJobsStrategy también)
-    private uaderStrategy: UaderStrategy,
+    private readonly prisma: PrismaService,
+    private readonly uaderStrategy: UaderStrategy,
+    private readonly discordService: DiscordService,
   ) {
     this.strategies = [this.uaderStrategy];
+  }
+
+  // ESTE ES EL GATILLO QUE NOS FALTA
+  async onModuleInit() {
+    this.logger.log('🚀 Disparando scraping manual al inicio...');
+    await this.runScrapingCycle();
   }
 
   /**
@@ -37,6 +45,13 @@ export class JobsService {
         const saved = await this.saveIfNew(item);
         if (saved) {
           newInternships.push(item);
+
+          await this.discordService.sendNotification({
+            title: item.title,
+            url: item.url,
+            origin: item.origin,
+            imageUrl: item.imageUrl,
+          });
         }
       }
     }
@@ -71,7 +86,7 @@ export class JobsService {
           imageUrl: item.imageUrl,
           publishedAt: item.publishedAt,
           foundAt: new Date(),
-          isPublished: false, // Aún no se envió a Discord
+          isPublished: true, // Aún no se envió a Discord
         },
       });
 
